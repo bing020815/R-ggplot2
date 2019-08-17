@@ -1,0 +1,251 @@
+---
+title: "ggplot2_Geometry Type"
+author: "Bing-Je_Wu"
+date: "8/17/2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+## Outlines
+  * Scatterplots  
+  * Lines and Smoothers  
+  * Bars and Columns   
+  * Histograms  
+  * Boxplots  
+
+
+## Scatterplots 
+#### Load the datase
+```{r}
+library(tidyverse)
+college <- read_csv('http://672258.youcanlearnit.net/college.csv')
+college <- college %>%
+  mutate(state=as.factor(state), region=as.factor(region),
+         highest_degree=as.factor(highest_degree),
+         control=as.factor(control), gender=as.factor(gender),
+         loan_default_rate=as.numeric(loan_default_rate))
+
+colSums(is.na(college))
+```
+
+#### Simple scatterplot
+```{r}
+ggplot(data=college) +
+  geom_point(mapping=aes(x=tuition, y=sat_avg))
+```
+
+#### We can do this using the shape attribute
+```{r}
+ggplot(data=college) +
+  geom_point(mapping=aes(x=tuition, y=sat_avg, shape=control))
+```
+
+#### We can use color
+```{r}
+ggplot(data=college) +
+  geom_point(mapping=aes(x=tuition, y=sat_avg, color=control))
+```
+
+#### We can use color to represent the number of students
+```{r}
+ggplot(data=college) +
+  geom_point(mapping=aes(x=tuition, y=sat_avg, color=control, size=undergrads))
+```
+
+#### And, lastly, we ca add some transparency so we can see through those points a bit
+```{r}
+ggplot(data=college) +
+  geom_point(mapping=aes(x=tuition, y=sat_avg, color=control, size=undergrads), alpha=0.5)
+```
+
+
+
+## Lines and Smoothers
+#### Load the dataset 
+```{r}
+library(tidyverse)
+college <- read_csv('http://672258.youcanlearnit.net/college.csv')
+college <- college %>%
+  mutate(state=as.factor(state), region=as.factor(region),
+         highest_degree=as.factor(highest_degree),
+         control=as.factor(control), gender=as.factor(gender),
+         loan_default_rate=as.numeric(loan_default_rate))
+```
+
+#### We use line graph instead of scatterplots
+```{r}
+ggplot(data=college) +
+  geom_line(mapping=aes(x=tuition, y=sat_avg, color=control))
+```
+
+#### Add oints back in
+```{r}
+ggplot(data=college) +
+  geom_line(mapping=aes(x=tuition, y=sat_avg, color=control)) +
+  geom_point(mapping=aes(x=tuition, y=sat_avg, color=control))
+```
+
+#### Alternative code
+```{r}
+ggplot(data=college, mapping=aes(x=tuition, y=sat_avg, color=control)) +
+  geom_line() +
+  geom_point()
+```
+
+#### Add geom_smooth geometry to fit a line instead of connecting every point
+```{r}
+ggplot(data=college, mapping=aes(x=tuition, y=sat_avg, color=control)) +
+  geom_smooth() +
+  geom_point()
+```
+
+#### Add transparency to just the points to make the line stand out more
+```{r}
+ggplot(data=college, mapping=aes(x=tuition, y=sat_avg, color=control)) +
+  geom_smooth() +
+  geom_point(alpha=0.5)
+```
+
+#### Remove the confidence interval from the smoother
+```{r}
+ggplot(data=college, mapping=aes(x=tuition, y=sat_avg, color=control)) +
+  geom_smooth(se=FALSE) +
+  geom_point(alpha=1/5)
+```
+
+
+
+
+## Bars and Columns
+*bar graph: uses count as the y-axis value*
+*col graph: allows user to specify y-axis value*
+
+#### Load the dataset
+```{r}
+library(tidyverse)
+college <- read_csv('http://672258.youcanlearnit.net/college.csv')
+college <- college %>%
+  mutate(state=as.factor(state), region=as.factor(region),
+         highest_degree=as.factor(highest_degree),
+         control=as.factor(control), gender=as.factor(gender),
+         loan_default_rate=as.numeric(loan_default_rate))
+```
+
+#### Use bar graph to get the counts of schools in each region?
+```{r}
+ggplot(data=college) +
+  geom_bar(mapping=aes(x=region))
+```
+
+#### Break it out by public vs. private
+```{r}
+ggplot(data=college) +
+  geom_bar(mapping=aes(x=region, fill=control))
+```
+
+#### What is average tuition by region?
+Use dplyr to create the right tibble first
+```{r}
+college %>%
+  group_by(region) %>%
+  summarize(average_tuition=mean(tuition))
+```
+
+#### If use geom_bar on y-axis, it must have stat = "identity"
+```{r}
+college %>%
+  group_by(region) %>%
+  summarize(average_tuition=mean(tuition)) %>%
+  ggplot() +
+  geom_bar(mapping=aes(x=region, y=average_tuition), stat="identity")
+```
+
+#### Use geom-col instead
+```{r}
+college %>%
+  group_by(region) %>%
+  summarize(average_tuition=mean(tuition)) %>%
+  ggplot() +
+  geom_col(mapping=aes(x=region, y=average_tuition))
+```
+
+
+
+
+
+## Histograms
+#### Load the dataset
+```{r}
+library(tidyverse)
+college <- read_csv('http://672258.youcanlearnit.net/college.csv')
+college <- college %>%
+  mutate(state=as.factor(state), region=as.factor(region),
+         highest_degree=as.factor(highest_degree),
+         control=as.factor(control), gender=as.factor(gender),
+         loan_default_rate=as.numeric(loan_default_rate))
+```
+
+#### Use Histograms to bin
+
+```{r}
+ggplot(data=college) +
+  geom_histogram(mapping=aes(x=undergrads), boundary=0)  #- boundary = origin point
+
+```
+
+#### Seperate into 4 bins
+```{r}
+ggplot(data=college) +
+  geom_histogram(mapping=aes(x=undergrads), bins=4, boundary=0)
+```
+
+#### Seperate into 10 bins
+```{r}
+ggplot(data=college) +
+  geom_histogram(mapping=aes(x=undergrads), bins=10, boundary=0)
+```
+
+#### Specify the width of the bins
+```{r}
+ggplot(data=college) +
+  geom_histogram(mapping=aes(x=undergrads), binwidth=1000, boundary=0)
+```
+
+
+
+
+
+## Boxplots
+#### Load the dataset as described in Video 1.3
+```{r}
+library(tidyverse)
+college <- read_csv('http://672258.youcanlearnit.net/college.csv')
+college <- college %>%
+  mutate(state=as.factor(state), region=as.factor(region),
+         highest_degree=as.factor(highest_degree),
+         control=as.factor(control), gender=as.factor(gender),
+         loan_default_rate=as.numeric(loan_default_rate))
+```
+
+#### Use scatter plot to see tuition vs. institutional control
+```{r}
+ggplot(data=college) +
+  geom_point(mapping=aes(x=control, y=tuition))
+```
+
+#### Use jitter instead
+```{r}
+ggplot(data=college) +
+  geom_jitter(mapping=aes(x=control, y=tuition))
+```
+
+#### Boxplot
+```{r}
+ggplot(data=college) +
+  geom_boxplot(mapping=aes(x=control, y=tuition))
+```
